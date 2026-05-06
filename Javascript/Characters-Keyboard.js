@@ -62,17 +62,7 @@ const moving = () => {
 
     requestAnimationFrame(moving);
 }
-const textswap = () => {
-    if (currentLevel[levelIndex].dialague[count].name === "Hero") {
-            bubbles.style.display = "block"
-            npcbubbles.style.display = "none";
-            text.innerText = currentLevel[levelIndex].dialague[count].text
-    } else if (currentLevel[levelIndex].dialague[count].name !== "Hero") {
-            npcbubbles.style.display = "block"
-            bubbles.style.display = "none";
-            npctext.innerText = currentLevel[levelIndex].dialague[count].text; 
-    }
-} 
+
 const GateKeeper = () => {
     requestAnimationFrame(GateKeeper);
 
@@ -96,47 +86,218 @@ const GateKeeper = () => {
     }
     
 }
+let currentSceneID = "Home";
+// let count = 0;
+
+const getScene = () => currentLevel.find(scene => scene.sceneID === currentSceneID);
+
+const textswap = () => {
+    const scene = getScene();
+    const dialogue = scene.dialague[count];
+
+    if (!dialogue) return;
+
+    // Handle choices
+    if (dialogue.choices) {
+        showChoices(dialogue.choices);
+        return;
+    }
+
+    if (dialogue.name === "Hero") {
+        bubbles.style.display = "block";
+        npcbubbles.style.display = "none";
+        text.innerText = dialogue.text;
+    } else {
+        npcbubbles.style.display = "block";
+        bubbles.style.display = "none";
+        npctext.innerText = dialogue.text;
+    }
+};
+
+const nextDialogue = () => {
+    const scene = getScene();
+    count++;
+
+    if (count >= scene.dialague.length) {
+        if (scene.nextScene) {
+            currentSceneID = scene.nextScene;
+            count = 0;
+        }
+    }
+
+    textswap();
+};
+
+const showChoices = (choices) => {
+    const container = document.getElementById("choices");
+    container.innerHTML = "";
+
+    choices.forEach(choice => {
+        const btn = document.createElement("button");
+        btn.innerText = choice.text;
+
+        btn.onclick = () => {
+            currentSceneID = choice.nextScene;
+            count = 0;
+            container.innerHTML = "";
+            textswap();
+        };
+
+        container.appendChild(btn);
+    });
+};
+
 let currentLevel = [
-    {sceneID: "Home", LookAt: "left", triggerPoint: 1400, hasdialague: true, dialague:[{name: "TV", text: "AI robots are taking over the world."}, {name: "Hero", text: "Its 7:55 I should head to collage."}], background: ('img/Medium-start.png')},
 
-    { sceneID: "way-college", hasdialague: false, background: ('scene/1.png')},
+    {
+        sceneID: "Home",
+        nextScene: "walk",
+        dialague: [
+            { name: "TV", text: "AI robots are taking over the world." },
+            { name: "Hero", text: "Its 7:55 I should head to college." },
+            {
+                name: "Hero",
+                text: "What should I do?",
+                choices: [
+                    { text: "Go to college", nextScene: "classroom" },
+                    { text: "Stay home", nextScene: "badEnding1" }
+                ]
+            }
+        ],
+        background: 'img/Medium-start.png'
+    },
 
-    {sceneID: "classroom", LookAt: "left", triggerPoint: 850, hasdialague: true, dialague: [{name: "Teacher", text: "AI is taking over the world I cant help since im too old."}, {name: "Teacher", text: "I send you on a quest for extra credit! MC!!!"}, 
-    {name: "Hero", text:"Extra credit, ill do anything for extra credit!"}, {name: "Teacher", text: "Go home wise student and gather your items to conquer AI!"}], background: ('scene/2.png')},
+    {
+        sceneID: "walk",
+        nextScene: "classroom",
+        dialague: [
+            { name: "Hero", text: "Walking to school..." }
+        ],
+        background: 'scene/1.png'
+    },
 
-    {hasdialague: false, background: ('scene/3.png')},
+    {
+        sceneID: "classroom",
+        nextScene: "goHomePrep",
+        dialague: [
+            { name: "Teacher", text: "AI is taking over the world!" },
+            { name: "Teacher", text: "I send you on a quest for extra credit!" },
+            { name: "Hero", text:"Extra credit? I'll do anything!" },
+            {
+                name: "Teacher",
+                text: "Will you accept?",
+                choices: [
+                    { text: "Accept quest", nextScene: "goHomePrep" },
+                    { text: "Refuse", nextScene: "badEnding2" }
+                ]
+            }
+        ],
+        background: 'scene/2.png'
+    },
 
-    {sceneID: "Home2", LookAt: "left", triggerPoint: 600, hasdialague: true, dialague:[{name: "TV", text: "Air Line (67 + 67)/67 to AI military base."}], background: ('img/Medium-start.png')},
+    {
+        sceneID: "goHomePrep",
+        nextScene: "airplaneIntro",
+        dialague: [
+            { name: "TV", text: "Air Line (67 + 67)/67 to AI military base." }
+        ],
+        background: 'img/Medium-start.png'
+    },
 
-    {hasdialague: false, background: ('scene/5.png')}, 
+    {
+        sceneID: "airplaneIntro",
+        nextScene: "warehouse1",
+        dialague: [
+            { name: "soldier", text: "Follow me to base, there's incoming fire." }
+        ],
+        background: 'scene/8.png'
+    },
 
-    {hasdialague: false, background: ('scene/6.png')},
+    {
+        sceneID: "warehouse1",
+        dialague: [
+            { name: "soldier", text: "We need the secret weapon." },
+            { name: "Hero", text: "No it’s too dangerous." },
+            { name: "soldier", text: "The ENERGY SWORD." },
+            {
+                name: "Hero",
+                text: "Should I help?",
+                choices: [
+                    { text: "Help", nextScene: "warehouse2" },
+                    { text: "Refuse", nextScene: "badEnding3" }
+                ]
+            }
+        ],
+        background: 'scene/14.png'
+    },
 
-    {hasdialague: false, background: ('scene/7.png')},
+    {
+        sceneID: "warehouse2",
+        nextScene: "codingMission",
+        dialague: [
+            { name: "soldier", text: "Retrieve the second piece!" },
+            { name: "Hero", text: "Got it." }
+        ],
+        background: 'scene/17.png'
+    },
 
-    {hasdialague: false, background: ('scene/9.png')},
+    {
+        sceneID: "codingMission",
+        dialague: [
+            {
+                name: "soldier",
+                text: "Final step: do some coding to stop AI.",
+                choices: [
+                    { text: "Hack the AI", nextScene: "goodEnding" },
+                    { text: "Shut everything down", nextScene: "neutralEnding" }
+                ]
+            }
+        ],
+        background: 'scene/20.png'
+    },
 
-    {sceneID: "airplane", triggerPoint: 700, hasdialague: true, dialague:[{name: "soldier", text: "Follow me to base, theirs incoming fire."}], background: ('scene/8.png')},
+    // ===== ENDINGS =====
 
-    {sceneID: "warehouse1", LookAt: "left", triggerPoint: 800, hasdialague: true, dialague:[{name: "soldier", text: "We need the secret weapon."}, {name: "Hero", text: "No it’s too dangerous."}, 
-    {name: "soldier", text: "The ENERGY SWORD"}, {name: "Hero", text: "Sure."},
-    {name: "soldier", text: "It was separated to two warehouses."},{name: "Hero", text: "Will I get more extra credit?"}], background: ('scene/14.png')},
+    {
+        sceneID: "goodEnding",
+        dialague: [
+            { name: "Hero", text: "I hacked the AI and saved the world!" }
+        ],
+        background: 'scene/21.png'
+    },
 
-    {combatmode: true, hasdialague: false, background: ('scene/16.png')},
+    {
+        sceneID: "neutralEnding",
+        dialague: [
+            { name: "Hero", text: "I shut everything down... the world is quiet now." }
+        ],
+        background: 'scene/21.png'
+    },
 
-    {sceneID: "warehouse1",LookAt: "left", triggerPoint: 800, combatmode: false, hasdialague: true, dialague: [{name: "soldier", text: "Go to the second company, and retrive the piece!"}, {name: "Hero", text: "okay."}],background: ('scene/17.png')},
+    {
+        sceneID: "badEnding1",
+        dialague: [
+            { name: "TV", text: "You stayed home. AI took over everything." }
+        ],
+        background: 'scene/3.png'
+    },
 
-    {combatmode: true, hasdialague: false, background: ('scene/18.png')},
+    {
+        sceneID: "badEnding2",
+        dialague: [
+            { name: "Teacher", text: "You failed... no extra credit." }
+        ],
+        background: 'scene/3.png'
+    },
 
-    {sceneID: "warehouse1", combatmode: false, hasdialague: true, dialague: [{name: "soldier", text: "Now go you need to do some coding"}, {name: "Hero", text: "Okay!"}], background: ('scene/20.png')},
-
-    {combatmode: false, hasdialague: false, background: ('scene/21.png')}, 
-
-    {combatmode: true, hasdialague: false, background: ('scene/21.png')}, 
-
-    {sceneID: "airplane", triggerPoint: 900, hasdialague: true, dialague:[{name: "soldier", text: "Goodbye, Thank you."}], background: ('scene/8.png')}
-
-]
+    {
+        sceneID: "badEnding3",
+        dialague: [
+            { name: "soldier", text: "Without you, we lost the war." }
+        ],
+        background: 'scene/3.png'
+    }
+];
 function changeBackground() {
     document.getElementById("Background").addEventListener('click', function() {
         levelIndex++;

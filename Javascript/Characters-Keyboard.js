@@ -99,30 +99,16 @@ let currentLevel = [
 
             {
                 name: "Hero",
-                text: "I need stronger weapons."
+                text: "I need to help."
             }
         ],
-        nextScene: "militaryBase",
+        nextScene: "airGO",
         background: "img/Medium-start.png"
     },
     {
-        sceneID: "militaryBase",
+        sceneID: "airGo",
         triggerPoint: 700,
-        hasdialague: true,
-        dialague: [
-            {
-                name: "soldier",
-                text: "Follow me. We have a secret weapon."
-            },
-            {
-                name: "Hero",
-                text: "This place is huge."
-            },
-            {
-                name: "soldier",
-                text: "The ENERGY SWORD can destroy the AI core."
-            }
-        ],
+        hasdialague: false,
         nextScene: "warehouse",
         background: "scene/8.png"
     },

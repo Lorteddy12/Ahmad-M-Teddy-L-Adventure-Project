@@ -134,7 +134,7 @@ function enterDroppable(elem) {
     current_itemType = elem.firstElementChild.id;
     child = elem.firstElementChild;
     current_itemValue = child.lastElementChild.innerHTML;
-  }
+  } 
 }
 
 function leaveDroppable(elem) {

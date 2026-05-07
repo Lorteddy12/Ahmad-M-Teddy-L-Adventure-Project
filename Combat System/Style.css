@@ -1,0 +1,55 @@
+body {
+    margin: 0;
+    padding: 0;
+}
+#big-container {
+    display: flex;
+    flex-direction: column;
+    background-color: black;
+    height: 100vh;
+}
+#Charc {
+    position: relative;
+}
+#player , #enemy {
+    position: absolute;
+}
+#player img , #enemy img {
+    width: 150px;
+}
+#player-Outer-Line , #enemy-Outer-Line {
+    width: 200px;
+    height: 20px;
+    background-color: lightgray;
+    border: 2px solid white;
+    overflow: hidden;
+}
+#player-inner-Line , #enemy-inner-Line {
+    height: 100%;
+    width: 100%;
+    transition: width 0.5s ease-in-out;
+}
+#player-outer-Line {
+    background-color: green;
+}
+#enemy-outer-Line {
+    background-color: red;
+}
+#Shield {
+    position: absolute;
+    width: 180px;
+    border-radius: 50%;
+    box-shadow: 0 0 20px cyan;
+    opacity: 0;
+}
+.shield-active {
+    opacity: 1;
+}
+.bullet {
+    position: absolute;
+    width: 20px;
+    height: 10px;
+    background-color: aqua;
+    box-shadow: 0 0 5px aqua;
+    z-index: 5;
+}

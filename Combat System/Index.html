@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Combat System</title>
+    <link rel="stylesheet" href="Style.css">
+</head>
+<body>
+    <main id="big-container">
+        <div id="Charc">
+            <div id="player"><img src="Img/Ghost-charc.svg" alt="player"></div>
+            <div id="enemy">
+                <img src="Img/AI-Boss.svg" alt="enemy">
+                <div id="Shield"></div>
+            </div>
+        </div>
+        <!--Health bar-->
+        <div id="Health-bar-player">
+            <div id="player-inner-Line"></div>
+            <div id="player-Outer-Line"></div>
+        </div>
+        <div id="Health-bar-enemy">
+            <div id="enemy-Outer-Line"></div>
+            <div id="enemy-inner-Line"></div>
+        </div>
+        <!--Shooting btn-->
+        <div id="Shooting-btn">
+            <button id="Attack"></button>
+            <button id="Heal"></button>
+        </div>
+    </main>
+</body>
+<script src="Script.js"></script>
+</html>

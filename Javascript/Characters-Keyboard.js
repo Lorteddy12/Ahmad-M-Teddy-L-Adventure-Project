@@ -1,329 +1,358 @@
 const charc = document.getElementById("player");
 const bubbles = document.getElementById("bubbles");
-const text =  document.getElementById("text-content");
+const text = document.getElementById("text-content");
 const npcbubbles = document.getElementById("npc-bubbles");
-const npctext = document.getElementById("npctext"); 
+const npctext = document.getElementById("npctext");
 const Arrow = document.getElementById("Background");
-
-/* Globle Varables*/ 
+const choiceBox = document.getElementById("choices");
 let D = false;
 let A = false;
-let speed = 5;
+let speed = 15;
 let posX = 0;
-let posY = 0;
 let count = 0;
 let isTalking = false;
 let hasTalked = false;
-let levelIndex = 0;
+let currentSceneID = "Home";
+let currentLevel = [
+    {
+        sceneID: "Home",
+        triggerPoint: 1200,
+        hasdialague: true,
+        dialague: [
+            {
+                name: "TV",
+                text: "AI robots are taking over the world."
+            },
+            {
+                name: "Hero",
+                text: "Its 7:55 I should head to college."
+            }
+        ],
+        nextScene: "way-college",
+        background: "img/Medium-start.png"
+    },
+    {
+        sceneID: "way-college",
+        triggerPoint: 1300,
+        hasdialague: false,
+        nextScene: "classroom",
+        background: "scene/1.png"
+    },
+    {
+        sceneID: "classroom",
+        triggerPoint: 700,
+        hasdialague: true,
+        dialague: [
+            {
+                name: "Teacher",
+                text: "AI is taking over the world."
+            },
+            {
+                name: "Teacher",
+                text: "Will you help stop the AI?"
+            },
+            {
+                name: "Teacher",
+                text: "Choose your path.",
+                choices: [
+                    {
+                        text: "Yes I will help",
+                        nextScene: "heroPath"
+                    },
+                    {
+                        text: "No thanks",
+                        nextScene: "cowardPath"
+                    }
+                ]
+            }
+        ],
+        background: "scene/2.png"
+    },
+    {
+        sceneID: "heroPath",
+        triggerPoint: 700,
+        hasdialague: true,
+        dialague: [
+            {               
+                name: "Teacher",
+                text: "Good. Head home and prepare."
+               
+            },
+            {
+                name: "Hero",
+                text: "I will save the world."
+            }
+        ],
+        nextScene: "heroHome",
+        background: "scene/2.png"
+    },
+    {
+        sceneID: "heroHome",
+        triggerPoint: 800,
+        hasdialague: true,
+        dialague: [
+            {
+                name: "TV",
 
-// Keys Function //
-const e = (event) => {
+                text: "Military forces are losing against the AI."
+            },
 
-    if ((event.code === 'KeyA' || event.code === 'ArrowLeft') && isTalking === false) {
-        A = true
-    } else if ((event.code === 'KeyD' || event.code === 'ArrowRight') && isTalking === false) {
-        D = true
-    } else if (event.code === 'Enter' && isTalking === true) {
-        if (count >= currentLevel[levelIndex].dialague.length - 1) {
-            cleanup();
-        }
-         else {
-            count++;
-            textswap();
-        }
+            {
+                name: "Hero",
+                text: "I need stronger weapons."
+            }
+        ],
+        nextScene: "militaryBase",
+        background: "img/Medium-start.png"
+    },
+    {
+        sceneID: "militaryBase",
+        triggerPoint: 700,
+        hasdialague: true,
+        dialague: [
+            {
+                name: "soldier",
+                text: "Follow me. We have a secret weapon."
+            },
+            {
+                name: "Hero",
+                text: "This place is huge."
+            },
+            {
+                name: "soldier",
+                text: "The ENERGY SWORD can destroy the AI core."
+            }
+        ],
+        nextScene: "warehouse",
+        background: "scene/8.png"
+    },
+    {
+        sceneID: "warehouse",
+        triggerPoint: 700,
+        hasdialague: true,
+        dialague: [
+            {
+                name: "soldier",
+                text: "The sword was split into two pieces."
+            },
+            {
+                name: "Hero",
+                text: "Great..."
+            },
+            {
+                name: "soldier",
+                text: "You must recover both."
+            }
+        ],
+        nextScene: "finalBattle",
+        background: "scene/14.png"
+    },
+    {
+        sceneID: "finalBattle",
+        triggerPoint: 700,
+        hasdialague: true,
+        dialague: [
+            {
+                name: "AI",
+                text: "Human resistance is pointless."
+            },
+            {
+                name: "Hero",
+                text: "Not today."
+            },
+            {
+                name: "AI",
+                text: "SYSTEM FAILURE..."
+            },
+            {
+                name: "Hero",
+                text: "The world is finally safe."
+            }
+        ],
+        background: "scene/20.png"
+    },
+    {
+        sceneID: "cowardPath",
+        triggerPoint: 700,
+        hasdialague: true,
+        dialague: [
+            {
+                name: "Hero",
+                text: "Nah im going home."
+            },
+            {
+                name: "TV",
+                text: "BREAKING NEWS: AI has taken over the city."
+            },
+            {
+                name: "Hero",
+                text: "...maybe I should have helped."
+            }
+        ],
+        background: "scene/bad.png"
     }
-}
-
-const cleanup = () => {
-    bubbles.style.display = "none";
-    npcbubbles.style.display = "none";
-    Arrow.style.display = "block";
+];
+//find scene
+const getScene = () => {
+    return currentLevel.find(
+        scene => scene.sceneID === currentSceneID
+    );
+};
+//update background
+const updateScene = () => {
+    const scene = getScene();
+    if (!scene) return;
+    count = 0;
     isTalking = false;
-    count = 0
+    hasTalked = false;
     A = false;
     D = false;
-    hasTalked = true; 
-    
-}    
-// Stop moving function // 
-const Stopmoving = () => {
-        A = false
-        D = false
-}
-// Moving function //
+    posX = 0;
+    charc.style.left = posX + "px";
+    bubbles.style.display = "none";
+    npcbubbles.style.display = "none";
+    choiceBox.innerHTML = "";
+    Arrow.style.display = "none";
+    document.body.style.backgroundImage =
+        `url('${scene.background}')`;
+    document.body.style.backgroundPosition = "center";
+    document.body.style.backgroundRepeat = "no-repeat";
+    document.body.style.backgroundAttachment = "fixed";
+    document.body.style.backgroundSize = "cover";
+    document.body.className = scene.sceneID;
+};
+// character movement
 const moving = () => {
-    if (A === true && posX > 0 && isTalking === false) {
-        charc.style.left = (posX = posX - speed) + "px";
+
+    if (A && posX > 0 && !isTalking) {
+        posX -= speed;
+        charc.style.left = posX + "px";
         charc.style.transform = "scaleX(-1)";
-    } else if (D === true && posX < window.innerWidth - 245 && isTalking === false) {
-        charc.style.left = (posX = posX + speed) + "px"; 
+    }
+    else if (D && posX < window.innerWidth - 245 && !isTalking) {
+        posX += speed;
+        charc.style.left = posX + "px";
         charc.style.transform = "scaleX(1)";
     }
-
     requestAnimationFrame(moving);
-}
-
+};
+//movement
+const e = (event) => {
+    if ((event.code === 'KeyA' || event.code === 'ArrowLeft') && !isTalking) {
+        A = true;
+    }
+    else if ((event.code === 'KeyD' || event.code === 'ArrowRight') && !isTalking) {
+        D = true;
+    }
+    else if (event.code === 'Enter' && isTalking) {
+        nextDialogue();
+    }
+};
+// movement
+const Stopmoving = () => {
+    A = false;
+    D = false;
+};
+//start conversation
 const GateKeeper = () => {
-    requestAnimationFrame(GateKeeper);
-
-    if (levelIndex >= currentLevel.length) {
-        return;
-    } 
-    if(currentLevel[levelIndex].hasdialague === true) {
-    if (posX > currentLevel[levelIndex].triggerPoint && isTalking === false && hasTalked === false) {
+    const scene = getScene();
+    if (!scene) return;
+    if (
+        scene.hasdialague &&
+        posX > scene.triggerPoint &&
+        !isTalking &&
+        !hasTalked
+    ) {
         isTalking = true;
-        A = false;
-        D = false;
-        text.innerText = currentLevel[levelIndex].dialague[count].text;
-        hasTalked = true;
         count = 0;
-        textswap();  
-    }    
-   } else if (currentLevel[levelIndex].hasdialague === false){
+        hasTalked = true;
+       textswap();
+    }
+    else if (!scene.hasdialague) {
         if (posX > window.innerWidth - 275) {
-           Arrow.style.display = "block";
+            Arrow.style.display = "block";
         }
     }
-    
-}
-let currentSceneID = "Home";
-// let count = 0;
-
-const getScene = () => currentLevel.find(scene => scene.sceneID === currentSceneID);
+    requestAnimationFrame(GateKeeper);
+};
+// Show dialogue
 
 const textswap = () => {
     const scene = getScene();
     const dialogue = scene.dialague[count];
-
     if (!dialogue) return;
-
-    // Handle choices
     if (dialogue.choices) {
         showChoices(dialogue.choices);
-        return;
     }
-
     if (dialogue.name === "Hero") {
         bubbles.style.display = "block";
         npcbubbles.style.display = "none";
         text.innerText = dialogue.text;
-    } else {
+    }
+    else {
         npcbubbles.style.display = "block";
         bubbles.style.display = "none";
         npctext.innerText = dialogue.text;
     }
 };
-
+// next dialogue
 const nextDialogue = () => {
     const scene = getScene();
+    const dialogue = scene.dialague[count];
+    if (dialogue.choices) return;
     count++;
-
     if (count >= scene.dialague.length) {
-        if (scene.nextScene) {
-            currentSceneID = scene.nextScene;
-            count = 0;
-        }
+        cleanup();
+        Arrow.style.display = "block";
+        return;
     }
-
     textswap();
 };
-
+// choices
 const showChoices = (choices) => {
-    const container = document.getElementById("choices");
-    container.innerHTML = "";
-
+    choiceBox.innerHTML = "";
     choices.forEach(choice => {
         const btn = document.createElement("button");
         btn.innerText = choice.text;
-
         btn.onclick = () => {
             currentSceneID = choice.nextScene;
-            count = 0;
-            container.innerHTML = "";
-            textswap();
+            updateScene();
         };
-
-        container.appendChild(btn);
+        choiceBox.appendChild(btn);
     });
 };
-
-let currentLevel = [
-
-    {
-        sceneID: "Home",
-        nextScene: "walk",
-        dialague: [
-            { name: "TV", text: "AI robots are taking over the world." },
-            { name: "Hero", text: "Its 7:55 I should head to college." },
-            {
-                name: "Hero",
-                text: "What should I do?",
-                choices: [
-                    { text: "Go to college", nextScene: "classroom" },
-                    { text: "Stay home", nextScene: "badEnding1" }
-                ]
-            }
-        ],
-        background: 'img/Medium-start.png'
-    },
-
-    {
-        sceneID: "walk",
-        nextScene: "classroom",
-        dialague: [
-            { name: "Hero", text: "Walking to school..." }
-        ],
-        background: 'scene/1.png'
-    },
-
-    {
-        sceneID: "classroom",
-        nextScene: "goHomePrep",
-        dialague: [
-            { name: "Teacher", text: "AI is taking over the world!" },
-            { name: "Teacher", text: "I send you on a quest for extra credit!" },
-            { name: "Hero", text:"Extra credit? I'll do anything!" },
-            {
-                name: "Teacher",
-                text: "Will you accept?",
-                choices: [
-                    { text: "Accept quest", nextScene: "goHomePrep" },
-                    { text: "Refuse", nextScene: "badEnding2" }
-                ]
-            }
-        ],
-        background: 'scene/2.png'
-    },
-
-    {
-        sceneID: "goHomePrep",
-        nextScene: "airplaneIntro",
-        dialague: [
-            { name: "TV", text: "Air Line (67 + 67)/67 to AI military base." }
-        ],
-        background: 'img/Medium-start.png'
-    },
-
-    {
-        sceneID: "airplaneIntro",
-        nextScene: "warehouse1",
-        dialague: [
-            { name: "soldier", text: "Follow me to base, there's incoming fire." }
-        ],
-        background: 'scene/8.png'
-    },
-
-    {
-        sceneID: "warehouse1",
-        dialague: [
-            { name: "soldier", text: "We need the secret weapon." },
-            { name: "Hero", text: "No it’s too dangerous." },
-            { name: "soldier", text: "The ENERGY SWORD." },
-            {
-                name: "Hero",
-                text: "Should I help?",
-                choices: [
-                    { text: "Help", nextScene: "warehouse2" },
-                    { text: "Refuse", nextScene: "badEnding3" }
-                ]
-            }
-        ],
-        background: 'scene/14.png'
-    },
-
-    {
-        sceneID: "warehouse2",
-        nextScene: "codingMission",
-        dialague: [
-            { name: "soldier", text: "Retrieve the second piece!" },
-            { name: "Hero", text: "Got it." }
-        ],
-        background: 'scene/17.png'
-    },
-
-    {
-        sceneID: "codingMission",
-        dialague: [
-            {
-                name: "soldier",
-                text: "Final step: do some coding to stop AI.",
-                choices: [
-                    { text: "Hack the AI", nextScene: "goodEnding" },
-                    { text: "Shut everything down", nextScene: "neutralEnding" }
-                ]
-            }
-        ],
-        background: 'scene/20.png'
-    },
-
-    // ===== ENDINGS =====
-
-    {
-        sceneID: "goodEnding",
-        dialague: [
-            { name: "Hero", text: "I hacked the AI and saved the world!" }
-        ],
-        background: 'scene/21.png'
-    },
-
-    {
-        sceneID: "neutralEnding",
-        dialague: [
-            { name: "Hero", text: "I shut everything down... the world is quiet now." }
-        ],
-        background: 'scene/21.png'
-    },
-
-    {
-        sceneID: "badEnding1",
-        dialague: [
-            { name: "TV", text: "You stayed home. AI took over everything." }
-        ],
-        background: 'scene/3.png'
-    },
-
-    {
-        sceneID: "badEnding2",
-        dialague: [
-            { name: "Teacher", text: "You failed... no extra credit." }
-        ],
-        background: 'scene/3.png'
-    },
-
-    {
-        sceneID: "badEnding3",
-        dialague: [
-            { name: "soldier", text: "Without you, we lost the war." }
-        ],
-        background: 'scene/3.png'
-    }
-];
+// cleanup text
+const cleanup = () => {
+    bubbles.style.display = "none";
+    npcbubbles.style.display = "none";
+    isTalking = false;
+    count = 0;
+    A = false;
+    D = false;
+};
+// change scenes
 function changeBackground() {
-    document.getElementById("Background").addEventListener('click', function() {
-        levelIndex++;
-        posX = 0;
-        charc.style.left = posX + "px"; 
-        document.body.style.backgroundImage = "url('" + currentLevel[levelIndex].background + "')";
-        document.body.style.backgroundPosition = "center";
-        document.body.style.backgroundRepeat = "no-repeat";
-        document.body.style.backgroundAttachment = "fixed";
-        document.body.style.backgroundSize = "cover";
-        document.body.className = currentLevel[levelIndex].sceneID;
-        Arrow.style.display = "none";
-        hasTalked = false;
+    Arrow.addEventListener('click', () => {
+        const scene = getScene();
+        if (scene.nextScene) {
+            currentSceneID = scene.nextScene;
+            updateScene();
+        }
     });
 }
+// Inventory
 const inventory = document.getElementById('inventory-overlay');
 
 document.addEventListener('keydown', (event) => {
+
     if (event.key === 'm' || event.key === 'M') {
+
         inventory.classList.toggle('hidden');
     }
 });
-
-
+updateScene();
 changeBackground();
 GateKeeper();
 moving();
-window.addEventListener('keydown', e); 
+window.addEventListener('keydown', e);
 window.addEventListener('keyup', Stopmoving);
